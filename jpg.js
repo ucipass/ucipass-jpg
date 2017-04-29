@@ -80,19 +80,19 @@ class JPG extends File {
 		var file = this
 		var resolve,reject
 		var final = new Promise((res,rej) => { resolve = res, reject = rej })
-		if (!this.buffer){ await this.read() }
+		if (!this.buffer){ await file.read() }
 		new ExifImage( file.buffer , function (error, exifData) {
 			log.silly("EXIF: Starting...",exifData)
 			if(error){
 				log.debug("EXIF ERR: No Data:")
-				resolve(exif)
+				resolve(file)
 			}
 			else if (!exifData || !exifData.exif || !exifData.exif.DateTimeOriginal) {
 				log.debug("EXIF: No Data:")
-				resolve(this)
+				resolve(file)
 			}
 			else{
-				log.silly("EXIF: OK...",this)
+				log.silly("EXIF: OK...",file)
 				file.exif = exifData
 				file.DateTimeOriginal = exifData.exif.DateTimeOriginal
 				//exif.UserComment	= (exifData.exif && exifData.exif.UserComment) ? (new Buffer(exifData.exif.UserComment)).toString() : null
