@@ -1,6 +1,6 @@
 {
   "name": "ucipass-jpg",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "JPG and EXIF manipulation class",
   "main": "jpg.js",
   "scripts": {
