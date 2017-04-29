@@ -34,6 +34,7 @@ describe('JPG Unit Tests', function(){
         mkdirp.sync(path.dirname(testfile5))
         
     })
+
     after("Deleting and Setting Directories Only", function(done){
         rimraf(galleryDir,(err)=>{ if(err){ done(err)} else{ done()} })
     })
@@ -61,30 +62,36 @@ describe('JPG Unit Tests', function(){
     });
 
     it('Add Exif to Image, Get Exif from Image', async function(){
-       var jpg = new JPG(testfile1)
+        var jpg = new JPG(testfile1)
         if(! await jpg.isFile(testfile1)) { await jpg.createImageFile("testfile1",1024,768) }
-        jpg.exif = {
-            "DateTimeOriginal" : "2011:11:11 11:11:11",
-            "ImageDescription" : "Test Description, Hello, Andras, Alexandra, Eva, Adam ,Gabor",
-            "Rating"    : "0",
-            "Make" : "NodeJS",
-            "Model" : "JIMP",
-            "gps" : {
-                GPSLatitudeRef: 'N',
-                GPSLatitude: [[44,1],[51,1],[31,1]],
-                GPSLongitudeRef: 'W',
-                GPSLongitude: [[86,1],[4,1],[0,1]],
-                lat: '34.1', 
-                lon: '86.1'
-            }
+        jpg.DateTimeOriginal = "2011:11:11 11:11:11"
+        jpg.ImageDescription = "Test Description"
+        jpg.Rating = "0"
+        jpg.Make = "NodeJS"
+        jpg.Model = "JIMP"
+        jpg.XPTitle = "Test XPTitle"
+        jpg.XPSubject = "Test XPSubject"
+        jpg.XPKeywords = "Andras;Eva;Adam;Alexandra"
+        jpg.XPComment = "Test XPComment"
+        jpg.gps = {
+            GPSLatitudeRef: 'N',
+            GPSLatitude: [[44,1],[51,1],[31,1]],
+            GPSLongitudeRef: 'W',
+            GPSLongitude: [[86,1],[4,1],[0,1]],
         }
         await jpg.setExif()
-        await jpg.getExif()
-        jpg.exif.Make.should.equal("NodeJS")
-        jpg.exif.Model.should.equal("JIMP")
-        jpg.exif.Rating.should.equal(0)
-        jpg.exif.ImageDescription.should.equal("Test Description, Hello, Andras, Alexandra, Eva, Adam ,Gabor")
-        jpg.exif.DateTimeOriginal.should.equal("2011:11:11 11:11:11")
+
+        var jpg2 = new JPG(testfile1)
+        await jpg2.getExif()
+        jpg2.DateTimeOriginal.should.equal("2011:11:11 11:11:11")
+        jpg2.ImageDescription.should.equal("Test Description")
+        jpg2.Rating.should.equal("0")
+        jpg2.Make.should.equal("NodeJS")
+        jpg2.Model.should.equal("JIMP")
+        jpg2.XPTitle.should.equal("Test XPTitle")
+        jpg2.XPSubject.should.equal("Test XPSubject")
+        jpg2.XPKeywords.should.equal("Andras;Eva;Adam;Alexandra")
+        jpg2.XPComment.should.equal("Test XPComment")
         return true
     });
 
@@ -96,7 +103,7 @@ describe('JPG Unit Tests', function(){
         var dateString = moment(fdate).format("YYYY:MM:DD HH:mm:ss")
         await jpg.setExifDate(fdate)
         await jpg.getExif()
-        return jpg.exif.DateTimeOriginal.should.equal(dateString)
+        return jpg.DateTimeOriginal.should.equal(dateString)
     });
 
     it('Change filename based on Image Exif Date', async function(){
@@ -126,5 +133,9 @@ describe('JPG Unit Tests', function(){
         return isFile.should.equal(true)
     });
 
+    it('Get Location from Image', async function(){
+
+        return true
+    });
 
 })

@@ -14,16 +14,21 @@ var File = require("ucipass-file")
 class JPG extends File {
 	constructor(fpath) {
 		super(fpath);
-		this.exif	= {};
-		this.thumb	= null
-		this.idate	= null
-		this.event	= null
-		this.desc	= null
-		this.location	= null
-		this.cc		= null
-		this.people = null
-		this.rating = null
-		this.att	= null
+		this.DateTimeOriginal	 = null
+		this.ImageDescription	 = null
+		this.Make	 = null
+		this.Model	 = null
+		this.Rating	 = null
+		this.XPTitle	 = null
+		this.XPSubject	 = null
+		this.XPKeywords	 = null
+		this.XPComment	 = null
+		this.gps	 = null
+		this.lat	 = null
+		this.lon	 = null
+		this.location	 = null
+		this.country	 = null
+		this.cc	 = null		
 	}
 
 	isValid() {
@@ -73,39 +78,44 @@ class JPG extends File {
 	async getExif(){try{
 		//json.file is the only parameter that is used
 		var file = this
-		var exif = {}
 		var resolve,reject
 		var final = new Promise((res,rej) => { resolve = res, reject = rej })
 		if (!this.buffer){ await this.read() }
 		new ExifImage( file.buffer , function (error, exifData) {
+			log.silly("EXIF: Starting...",exifData)
 			if(error){
 				log.debug("EXIF ERR: No Data:")
 				resolve(exif)
 			}
 			else if (!exifData || !exifData.exif || !exifData.exif.DateTimeOriginal) {
 				log.debug("EXIF: No Data:")
-				resolve(exif)
+				resolve(this)
 			}
 			else{
-				log.silly("EXIF: Starting...",exif)
-				exif.DateTimeOriginal = exifData.exif.DateTimeOriginal
-				exif.ImageDescription	= (exifData.image && exifData.image.ImageDescription) ?	exifData.image.ImageDescription : null
-				exif.Make	= (exifData.image && exifData.image.Make) ?		exifData.image.Make : null
-				exif.Model	= (exifData.image && exifData.image.Model) ?	exifData.image.Model : null
-				exif.Rating	= (exifData.image && exifData.image.Rating >= 0 ) ?	exifData.image.Rating : null
-				exif.Model	= (exifData.image && exifData.image.Model) ?	exifData.image.Model : null
-				log.silly("Exif GPS Data",exif)
+				log.silly("EXIF: OK...",this)
+				file.exif = exifData
+				file.DateTimeOriginal = exifData.exif.DateTimeOriginal
+				//exif.UserComment	= (exifData.exif && exifData.exif.UserComment) ? (new Buffer(exifData.exif.UserComment)).toString() : null
+				file.ImageDescription	= (exifData.image && exifData.image.ImageDescription) ?	exifData.image.ImageDescription : null
+				file.Make	= (exifData.image && exifData.image.Make) ?		exifData.image.Make : null
+				file.Model	= (exifData.image && exifData.image.Model) ?	exifData.image.Model : null
+				file.Rating	= (exifData.image && exifData.image.Rating >= 0 ) ?	exifData.image.Rating.toString() : null
+				const StringDecoder = require('string_decoder').StringDecoder;
+				const decoder = new StringDecoder('ucs2');
+				file.XPTitle	= (exifData.image && exifData.image.XPTitle) ?	decoder.write(new Buffer(exifData.image.XPTitle)) : null
+				file.XPSubject	= (exifData.image && exifData.image.XPSubject) ?	decoder.write(new Buffer(exifData.image.XPSubject)) : null
+				file.XPKeywords	= (exifData.image && exifData.image.XPKeywords) ?	decoder.write(new Buffer(exifData.image.XPKeywords)) : null
+				file.XPComment	= (exifData.image && exifData.image.XPComment) ?	decoder.write(new Buffer(exifData.image.XPComment)) : null
+				log.silly("Exif GPS Data",exifData)
 				if (exifData.gps && exifData.gps.GPSLongitude){
-					exif.gps = {}
-					exif.exifData = exifData
+					file.gps = {}
 					log.silly("Exif GPS Conversion Start...")
-					exif.gps.lat = file.convertGPS(exifData.gps.GPSLatitude[0], exifData.gps.GPSLatitude[1], exifData.gps.GPSLatitude[2], exifData.gps.GPSLatitudeRef) 
-					log.silly("Exif Lat:",exif.gps.lat)
-					exif.gps.lon = file.convertGPS(exifData.gps.GPSLongitude[0], exifData.gps.GPSLongitude[1], exifData.gps.GPSLongitude[2], exifData.gps.GPSLongitudeRef)
-					log.silly("Exif Lon:",exif.gps.lon)
+					file.lat = file.convertGPS(exifData.gps.GPSLatitude[0], exifData.gps.GPSLatitude[1], exifData.gps.GPSLatitude[2], exifData.gps.GPSLatitudeRef) 
+					log.silly("Exif Lat:",file.lat)
+					file.lon = file.convertGPS(exifData.gps.GPSLongitude[0], exifData.gps.GPSLongitude[1], exifData.gps.GPSLongitude[2], exifData.gps.GPSLongitudeRef)
+					log.silly("Exif Lon:",file.lon)
 				}
-				log.debug( "EXIF: Complete:" , exif)
-				file.exif = exif;
+				log.silly( "EXIF: Complete:" , file)
 				resolve(file) ;
 			}
 		})
@@ -115,7 +125,7 @@ class JPG extends File {
 	async setExif(){try{
 		//json.file is the only parameter that is used
 		var file = this
-		var exif = this.exif
+		var exif = file
 		var resolve,reject
 		var final = new Promise((res,rej) => { resolve = res, reject = rej })
 		if (!exif ) {
@@ -140,6 +150,18 @@ class JPG extends File {
 		if(exif.Rating){
 			exifObj["0th"][piexif.ImageIFD.Rating] = parseInt(exif.Rating)
 		}
+		if(exif.XPTitle){
+			exifObj["0th"][piexif.ImageIFD.XPTitle] = this.strEncodeUTF16(exif.XPTitle)
+		}
+		if(exif.XPSubject){
+			exifObj["0th"][piexif.ImageIFD.XPSubject] = this.strEncodeUTF16(exif.XPSubject)
+		}
+		if(exif.XPKeywords){
+			exifObj["0th"][piexif.ImageIFD.XPKeywords] = this.strEncodeUTF16(exif.XPKeywords)
+		}
+		if(exif.XPComment){
+			exifObj["0th"][piexif.ImageIFD.XPComment] = this.strEncodeUTF16(exif.XPComment)
+		}
 		if(exif.gps){
 			exifObj["GPS"][piexif.GPSIFD.GPSDateStamp] = "1999:99:99 99:99:99";
 			exifObj["GPS"][piexif.GPSIFD.GPSLatitudeRef] = exif.gps.GPSLatitudeRef
@@ -159,7 +181,7 @@ class JPG extends File {
 	async setExifDate(fdate){try{
 		var jpg = this
 		if(!fdate) {throw "No date given to set EXIF"}
-		jpg.exif.DateTimeOriginal = moment(fdate).format("YYYY:MM:DD HH:mm:ss")
+		jpg.DateTimeOriginal = moment(fdate).format("YYYY:MM:DD HH:mm:ss")
         return this.setExif()
 	}catch(err){ log.error(err); return Promise.reject(err) }}
 
@@ -170,11 +192,11 @@ class JPG extends File {
 			throw("Invalid file type NOT JPG!") 
 		}
 		await file.getExif()
-		if ( ! file.exif.DateTimeOriginal) {
+		if ( ! file.DateTimeOriginal) {
 			if(!file.mtime) { await file.stat()}
 			await file.setExifDate(file.mtime)
 		}
-		var exifDateString = file.exif.DateTimeOriginal
+		var exifDateString = file.DateTimeOriginal
 		var exifDate = moment(exifDateString,"YYYY:MM:DD HH:mm:ss")
 		var exifDateFilename = path.join(path.dirname(file.fpath),  exifDate.format("YYYYMMDD_HHmmss_SSS")+".jpg" )
 		// If the filename is already formatted correctly, do not change anything
@@ -205,6 +227,26 @@ class JPG extends File {
 		
 	}catch(err){ log.error(err); return Promise.reject(err) }}
 
+	async printExif(){try{
+		var file = this
+		await file.getExif()
+
+		console.log(file.fpath)
+		console.log("  DateTimeOriginal: ",file.DateTimeOriginal)
+		console.log("  ImageDescription: ",file.ImageDescription)
+		console.log("  Make: ",file.Make)
+		console.log("  Model: ",file.Model)
+		console.log("  Rating: ",file.Rating)
+		console.log("  XPTitle: ",file.XPTitle)
+		console.log("  XPSubject: ",file.XPSubject)
+		console.log("  XPKeywords: ",file.XPKeywords)
+		console.log("  XPComment: ",file.XPComment)
+		console.log("  GPS: ",file.gps)
+		return file
+
+		
+	}catch(err){ log.error(err); return Promise.reject(err) }}
+
 	convertGPS(days, minutes, seconds, direction) {
 		try{
 			direction.toUpperCase();
@@ -218,6 +260,16 @@ class JPG extends File {
 			return 0;
 		}
 	}
+	strEncodeUTF16(str) {
+		let arr = Array.from(str);
+		var bufutf16 = []
+		for (let i=0; i < arr.length; i++) {
+			let code = arr[i].charCodeAt(0);
+			bufutf16.push(code);
+			bufutf16.push(0);
+		}
+		return bufutf16;
+	}	
 }
 
 module.exports = JPG
