@@ -51,7 +51,7 @@ class JPG extends File {
 		return this
 	}catch(err){ log.error(err); return Promise.reject(err) }}
 
-	async getThumb(){try{
+	async getThumb(quality){try{
 		var jpg = this;
 		var start = new Date().getTime();
 		if (!jpg.buffer){ await jpg.read() }
@@ -61,7 +61,7 @@ class JPG extends File {
 		var xSize, ySize
 		if (image.bitmap.width > image.bitmap.height ) { xSize = 640 ; ySize = Jimp.AUTO}
 		else { xSize = Jimp.AUTO ; ySize = 480 }
-		image = await image.resize( xSize, ySize)
+		image = await image.resize( xSize, ySize).quality(quality ? quality : 100)
 		log.silly("THUMB: Resize completed!")
 		var data = await new Promise((resolve,reject)=>{
 			image.getBase64( Jimp.MIME_JPEG, (err,data)=> {

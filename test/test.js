@@ -53,12 +53,24 @@ describe('JPG Unit Tests', function(){
         return Promise.resolve(true)
     });
 
-    it('Thumb Creation', async function(){
+    it.only('Thumb Creation', async function(){
         var jpg = new JPG(testfile1)
         if(! await jpg.isFile(testfile1)) { await jpg.createImageFile("testfile1",1024,768) }
+        var start = new Date().getTime()
         await jpg.getThumb()
-        jpg.buffer = Buffer.from(jpg.thumb, 'base64')
-        return true
+        //console.log("2:",new Date().getTime() - start, "ms","size",jpg.thumb.length)
+        var thumb2 = new JPG(testfile2)
+        thumb2.buffer = Buffer.from(jpg.thumb,'base64')
+        await thumb2.write()
+        
+        start = new Date().getTime()
+        await jpg.getThumb(50) //set quality lower to save space
+        //console.log("3:",new Date().getTime() - start, "ms","size",jpg.thumb.length)
+        thumb3 = new JPG(testfile3)
+        thumb3.buffer = Buffer.from(jpg.thumb,'base64')
+        await thumb3.write()
+
+        assert(thumb3.buffer.length < thumb2.buffer.length, true)
     });
 
     it('Add Exif to Image, Get Exif from Image', async function(){
