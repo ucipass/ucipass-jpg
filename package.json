@@ -1,6 +1,10 @@
 {
   "name": "@ucipass/jpg",
   "version": "1.0.2",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "description": "JPG and EXIF manipulation class",
   "main": "jpg.js",
   "scripts": {
