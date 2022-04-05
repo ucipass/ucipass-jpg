@@ -47,7 +47,7 @@ describe('JPG Unit Tests', function(){
 
     it('Hash Creation', async function(){
         var jpg = new JPG(testfile1)
-        await jpg.createImageFile("testfile1",1024,768)
+        if(! await jpg.isFile(testfile1)) { await jpg.createImageFile("testfile1",1024,768) }
         await jpg.hashfn(true)
         jpg.hash.should.equal("2e612028e6b80f01ec0bc2781e829a78")
         return Promise.resolve(true)
