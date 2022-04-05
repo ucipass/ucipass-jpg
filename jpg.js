@@ -102,10 +102,10 @@ class JPG extends File {
 				file.Rating	= (exifData.image && exifData.image.Rating >= 0 ) ?	exifData.image.Rating.toString() : null
 				const StringDecoder = require('string_decoder').StringDecoder;
 				const decoder = new StringDecoder('ucs2');
-				file.XPTitle	= (exifData.image && exifData.image.XPTitle) ?	decoder.write(new Buffer(exifData.image.XPTitle)) : null
-				file.XPSubject	= (exifData.image && exifData.image.XPSubject) ?	decoder.write(new Buffer(exifData.image.XPSubject)) : null
-				file.XPKeywords	= (exifData.image && exifData.image.XPKeywords) ?	decoder.write(new Buffer(exifData.image.XPKeywords)) : null
-				file.XPComment	= (exifData.image && exifData.image.XPComment) ?	decoder.write(new Buffer(exifData.image.XPComment)) : null
+				file.XPTitle	= (exifData.image && exifData.image.XPTitle) ?	decoder.write( Buffer.from(exifData.image.XPTitle)) : null
+				file.XPSubject	= (exifData.image && exifData.image.XPSubject) ?	decoder.write( Buffer.from(exifData.image.XPSubject)) : null
+				file.XPKeywords	= (exifData.image && exifData.image.XPKeywords) ?	decoder.write( Buffer.from(exifData.image.XPKeywords)) : null
+				file.XPComment	= (exifData.image && exifData.image.XPComment) ?	decoder.write( Buffer.from(exifData.image.XPComment)) : null
 				log.silly("Exif GPS Data",exifData)
 				if (exifData.gps && exifData.gps.GPSLongitude){
 					file.gps = {}
@@ -172,7 +172,7 @@ class JPG extends File {
 		exifObj["0th"][piexif.ImageIFD.Copyright] ="Copyright, Andras Arato, 2017. All rights reserved."
 		var exifBytes = piexif.dump(exifObj)
 		var newData = piexif.insert(exifBytes, file.buffer.toString("binary"));
-		file.buffer = new Buffer(newData, "binary");
+		file.buffer = Buffer.from(newData, "binary");
 		await file.write()
 		resolve(file)
 		return final

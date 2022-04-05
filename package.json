@@ -1,10 +1,10 @@
 {
-  "name": "ucipass-jpg",
-  "version": "1.0.1",
+  "name": "@ucipass/jpg",
+  "version": "1.0.2",
   "description": "JPG and EXIF manipulation class",
   "main": "jpg.js",
   "scripts": {
-    "test": "mocha"
+    "test": "node ./node_modules/mocha/bin/mocha"
   },
   "repository": {
     "type": "git",
@@ -29,6 +29,9 @@
     "moment": "^2.18.1",
     "piexifjs": "^1.0.3",
     "rimraf": "^2.6.1",
-    "ucipass-file": "^1.0.14"
+    "ucipass-file": "^1.0.25"
+  },
+  "devDependencies": {
+    "mocha": "^9.2.2"
   }
 }

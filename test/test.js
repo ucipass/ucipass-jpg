@@ -53,7 +53,7 @@ describe('JPG Unit Tests', function(){
         return Promise.resolve(true)
     });
 
-    it.only('Thumb Creation', async function(){
+    it('Thumb Creation', async function(){
         var jpg = new JPG(testfile1)
         if(! await jpg.isFile(testfile1)) { await jpg.createImageFile("testfile1",1024,768) }
         var start = new Date().getTime()
