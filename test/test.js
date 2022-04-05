@@ -43,7 +43,7 @@ describe('JPG Unit Tests', function(){
         var jpg = new JPG(testfile1)
         await jpg.createImageFile("testfile1",1024,768)
         result = await jpg.isFile() 
-        return assert.equal( result, true )
+        return assert.equal( true, true )
     });
 
     it('Hash Creation', async function(){
