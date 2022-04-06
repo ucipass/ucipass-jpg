@@ -51,6 +51,16 @@ class JPG extends File {
 		return this
 	}catch(err){ log.error(err); return Promise.reject(err) }}
 
+	async createThumbFile( thumb_filename, quality ){try{
+
+		await this.getThumb(quality ? quality : 50 );
+		const temp_buffer = this.buffer
+		this.buffer = Buffer.from(this.thumb,'base64')
+		await this.write(thumb_filename);
+		this.buffer = temp_buffer
+		return this
+	}catch(err){ log.error(err); return Promise.reject(err) }}
+
 	async getThumb(quality){try{
 		var jpg = this;
 		var start = new Date().getTime();

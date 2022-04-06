@@ -54,7 +54,7 @@ describe('JPG Unit Tests', function(){
         return Promise.resolve(true)
     });
 
-    it('Thumb Creation', async function(){
+    it('Thumb Creation Base64', async function(){
         var jpg = new JPG(testfile1)
         if(! await jpg.isFile(testfile1)) { await jpg.createImageFile("testfile1",1024,768) }
         var start = new Date().getTime()
@@ -72,6 +72,20 @@ describe('JPG Unit Tests', function(){
         await thumb3.write()
 
         assert(thumb3.buffer.length < thumb2.buffer.length, true)
+    });
+
+    it('Thumb Creation File', async function(){
+        const jpg = new JPG(testfile1)
+        if(! await jpg.isFile(testfile1)) { await jpg.createImageFile("testfile1",1024,768) }
+        await jpg.createThumbFile("thumb_testfile1")
+
+        //Testing
+        const thumb = new JPG("thumb_testfile1")
+        await thumb.getThumb()
+        buffer_length_original = jpg.buffer.length
+        buffer_length_thumb    = thumb.buffer.length
+        await thumb.unlink()
+        assert( buffer_length_thumb < buffer_length_original , true)
     });
 
     it('Add Exif to Image, Get Exif from Image', async function(){

@@ -19,12 +19,20 @@
         ],
         "internalConsoleOptions": "openOnSessionStart"
     },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceRoot}\\jpg.js"
-        },
+    {
+        "type": "node",
+        "request": "launch",
+        "name": "Launch Program",
+        "program": "${workspaceRoot}\\jpg.js",
+        "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+        "type": "node",
+        "request": "launch",
+        "name": "Launch thumb",
+        "program": "${workspaceRoot}/thumb.js",
+        "internalConsoleOptions": "openOnSessionStart"
+    },
         {
             "type": "node",
             "request": "attach",
