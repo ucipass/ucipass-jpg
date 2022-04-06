@@ -83,6 +83,7 @@ class JPG extends File {
             await fs.promises.mkdir( new_thumb_dir, {recursive:true} ) //No error if directory exists!
             await this.createThumbFile( new_thumb_file, quality )
 			this.fpath = backup_file  //restore original file name
+			this.buffer = null  //restore original file name
 		}
 
 		return this
