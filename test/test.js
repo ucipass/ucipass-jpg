@@ -88,6 +88,38 @@ describe('JPG Unit Tests', function(){
         assert( buffer_length_thumb < buffer_length_original , true)
     });
 
+    it('Thumb Creation Bulk', async function(){
+
+        const jpg = new JPG()
+        const jpg_dir   = "./test/files"
+        const thumb_dir = "./test/files_thumbs"
+        const quality   = 50
+
+        await jpg.createThumbDir( jpg_dir, thumb_dir, quality )
+
+		const readDirRecursive = async (filePath) => {
+			const dir = await fs.promises.readdir(filePath);
+			const files = await Promise.all(dir.map(async relativePath => {
+				const absolutePath = path.join(filePath, relativePath);
+				const stat = await fs.promises.lstat(absolutePath);
+		
+				return stat.isDirectory() ? readDirRecursive(absolutePath) : absolutePath;
+			}));
+		
+			return files.flat();
+		}
+
+		let files = await readDirRecursive (jpg_dir)
+        files = files.filter((file)=>{ return file.slice(-3) == "JPG" || file.slice(-3) == "jpg" })
+
+        let thumb_files = await readDirRecursive (thumb_dir)
+        thumb_files = thumb_files.filter((file)=>{ return file.slice(-3) == "JPG" || file.slice(-3) == "jpg" })
+
+        // Clean-up 
+        await fs.promises.rm( thumb_dir ,{ recursive: true, force: true })
+        assert( files.length ==  thumb_files.length, true)
+    });
+
     it('Add Exif to Image, Get Exif from Image', async function(){
         var jpg = new JPG(testfile1)
         if(! await jpg.isFile(testfile1)) { await jpg.createImageFile("testfile1",1024,768) }

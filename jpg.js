@@ -51,6 +51,43 @@ class JPG extends File {
 		return this
 	}catch(err){ log.error(err); return Promise.reject(err) }}
 
+	async createThumbDir( jpg_dir, thumb_dir, quality ){try{
+
+		const full_jpg_dir =  path.resolve(jpg_dir);
+        const full_thumb_dir =  path.resolve(thumb_dir);
+
+		// Read all files recursively
+		const readDirRecursive = async (filePath) => {
+			const dir = await fs.promises.readdir(filePath);
+			const files = await Promise.all(dir.map(async relativePath => {
+				const absolutePath = path.join(filePath, relativePath);
+				const stat = await fs.promises.lstat(absolutePath);
+		
+				return stat.isDirectory() ? readDirRecursive(absolutePath) : absolutePath;
+			}));
+		
+			return files.flat();
+		}
+		let files = await readDirRecursive (jpg_dir)
+
+		// Filter JPGs
+        files = files.filter((file)=>{ return file.slice(-3) == "JPG" || file.slice(-3) == "jpg" })
+
+        // Create Thumb files in new directory
+		for (const file of files) {
+			const backup_file = this.fpath //backup original file name
+			this.fpath = file
+            const jpg_rel_path   = path.relative (full_jpg_dir, this.path())
+            const new_thumb_dir  = path.join( full_thumb_dir, jpg_rel_path )
+            const new_thumb_file = path.join( new_thumb_dir , this.name())
+            await fs.promises.mkdir( new_thumb_dir, {recursive:true} ) //No error if directory exists!
+            await this.createThumbFile( new_thumb_file, quality )
+			this.fpath = backup_file  //restore original file name
+		}
+
+		return this
+	}catch(err){ log.error(err); return Promise.reject(err) }}
+
 	async createThumbFile( thumb_filename, quality ){try{
 
 		await this.getThumb(quality ? quality : 50 );
