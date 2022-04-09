@@ -19,9 +19,9 @@ jpg.createThumbFile("thumb_test.jpg")
 const JPG = require('@ucipass/jpg')
 
 const jpg = new JPG()
-const jpg_dir   = "./test/files"
-const thumb_dir = "./test/files_thumbs"
+const jpg_dir   = "./public/pics"
+const thumb_dir = "./public/thumbs"
 const quality   = 50
 
-await jpg.createThumbDir( jpg_dir, thumb_dir, quality )
+jpg.createThumbDir( jpg_dir, thumb_dir, quality )  // returns promise
 ````
